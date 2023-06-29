@@ -11,6 +11,5 @@ import (
 func Record(r *redis.Client, userID, videoID string, position int) error {
 	ctx := context.TODO()
 	key := fmt.Sprintf("%s_%s", userID, videoID)
-	r.Set(ctx, key, position, 1*time.Minute)
-	return nil
+	return r.Set(ctx, key, position, 1*time.Minute).Err()
 }
