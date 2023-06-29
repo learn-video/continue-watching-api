@@ -1,11 +1,16 @@
 {
   "packages": [
-    "go@1.20.3"
+    "go@1.20.3",
+    "redis@latest"
   ],
   "shell": {
     "init_hook": [
       "echo 'Welcome to devbox!' > /dev/null"
     ],
+    "env": {
+      "REDIS_PORT": 6379,
+      "REDIS_CONF": "./devbox.d/redis/redis.conf"
+    },
     "scripts": {
       "test": [
         "echo \"Error: no test specified\" && exit 1"
