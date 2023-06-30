@@ -32,5 +32,18 @@ func (h *Handler) Record(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
-	return c.JSON(http.StatusOK, pos)
+	return c.NoContent(http.StatusCreated)
+}
+
+func (h *Handler) Fetch(c echo.Context) error {
+	userID := c.QueryParam("user_id")
+	videoID := c.QueryParam("video_id")
+	pos, err := Fetch(h.r, userID, videoID)
+	if err == ErrNotFound {
+		return echo.NewHTTPError(http.StatusNotFound)
+	}
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError)
+	}
+	return c.JSON(http.StatusOK, &Position{VideoID: videoID, Position: pos})
 }

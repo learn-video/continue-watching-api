@@ -17,5 +17,6 @@ func main() {
 
 	e := echo.New()
 	e.POST("/watching", handler.Record)
+	e.GET("/watching", handler.Fetch)
 	e.Logger.Fatal(e.Start(":8000"))
 }
