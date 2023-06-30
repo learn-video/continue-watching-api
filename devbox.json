@@ -8,6 +8,7 @@
       "echo 'Welcome to devbox!' > /dev/null"
     ],
     "env": {
+      "REDIS_HOST": "localhost",
       "REDIS_PORT": 6379,
       "REDIS_CONF": "./devbox.d/redis/redis.conf"
     },

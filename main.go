@@ -1,14 +1,28 @@
 package main
 
 import (
+	"fmt"
+	"log"
+
+	"github.com/caarlos0/env/v9"
 	"github.com/labstack/echo/v4"
 	"github.com/learn-video/continue-watching-api/position"
 	"github.com/redis/go-redis/v9"
 )
 
+type config struct {
+	RedisHost string
+	RedisPort int
+}
+
 func main() {
+	cfg := &config{}
+	if err := env.Parse(&cfg); err != nil {
+		log.Fatalf("error loading config: %s", err)
+	}
+
 	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     fmt.Sprintf("%s:%d", cfg.RedisHost, cfg.RedisPort),
 		Password: "",
 		DB:       0,
 	})
