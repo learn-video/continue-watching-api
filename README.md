@@ -22,6 +22,7 @@ sequenceDiagram
 
     VideoPlayer->>+API: Record(videoId, position)
     API->>+Redis: Record(videoId, position)
+    Redis-->>-API: PositionResponse(success)
     alt Position recorded successfully
         API-->>VideoPlayer: HTTP 200 OK
     else Failed to record position
