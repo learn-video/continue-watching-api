@@ -20,12 +20,14 @@ sequenceDiagram
         VideoPlayer-->>API: HTTP 500 Internal Server Error
     end
 
-    VideoPlayer->>+API: Record(videoId, position)
-    API->>+Redis: Record(videoId, position)
-    Redis-->>-API: PositionResponse(success)
-    alt Position recorded successfully
-        API-->>VideoPlayer: HTTP 200 OK
-    else Failed to record position
-        API-->>VideoPlayer: HTTP 500 Internal Server Error
+    loop Record position every X seconds
+        VideoPlayer->>+API: Record(videoId, position)
+        API->>+Redis: Record(videoId, position)
+        Redis-->>-API: PositionResponse(success)
+        alt Position recorded successfully
+            API-->>VideoPlayer: HTTP 200 OK
+        else Failed to record position
+            API-->>VideoPlayer: HTTP 500 Internal Server Error
+        end
     end
 ```
