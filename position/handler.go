@@ -8,6 +8,15 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+type Position struct {
+	VideoID  string `json:"video_id" validate:"required"`
+	Position int    `json:"position" validate:"required"`
+}
+
+type PositionDetail struct {
+	Position int `json:"position"`
+}
+
 type (
 	Handler struct {
 		r *redis.Client
@@ -19,6 +28,10 @@ func NewHandler(r *redis.Client) *Handler {
 }
 
 func (h *Handler) Record(c echo.Context) error {
+	userID, err := c.Cookie("user_id")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
 	validate := validator.New()
 	pos := new(Position)
 	if err := c.Bind(pos); err != nil {
@@ -28,7 +41,7 @@ func (h *Handler) Record(c echo.Context) error {
 		return err
 	}
 
-	if err := Record(h.r, pos.UserID, pos.VideoID, pos.Position); err != nil {
+	if err := Record(h.r, userID.Value, pos.VideoID, pos.Position); err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
 
@@ -36,14 +49,17 @@ func (h *Handler) Record(c echo.Context) error {
 }
 
 func (h *Handler) Fetch(c echo.Context) error {
-	userID := c.QueryParam("user_id")
+	userID, err := c.Cookie("user_id")
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest)
+	}
 	videoID := c.QueryParam("video_id")
-	pos, err := Fetch(h.r, userID, videoID)
+	pos, err := Fetch(h.r, userID.Value, videoID)
 	if err == ErrNotFound {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError)
 	}
-	return c.JSON(http.StatusOK, &Position{VideoID: videoID, Position: pos})
+	return c.JSON(http.StatusOK, &PositionDetail{Position: pos})
 }

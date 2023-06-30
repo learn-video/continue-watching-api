@@ -14,12 +14,6 @@ var (
 	ErrNotFound = errors.New("no position tracked")
 )
 
-type Position struct {
-	UserID   string `json:"user_id" validate:"required"`
-	VideoID  string `json:"video_id" validate:"required"`
-	Position int    `json:"position" validate:"required"`
-}
-
 func Record(r *redis.Client, userID, videoID string, position int) error {
 	key := fmt.Sprintf("%s_%s", userID, videoID)
 	return r.Set(context.TODO(), key, position, 1*time.Minute).Err()
