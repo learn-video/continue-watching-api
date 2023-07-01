@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -16,17 +15,35 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRecordPositionOK(t *testing.T) {
+type contextSetup struct {
+	Method  string
+	Path    string
+	Body    string
+	Cookies []*http.Cookie
+}
+
+func setupContext(setup contextSetup) (echo.Context, *httptest.ResponseRecorder) {
 	e := echo.New()
-	positionJSON := `{"video_id": "123", "position": 1}`
-	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(positionJSON))
+	req := httptest.NewRequest(setup.Method, setup.Path, strings.NewReader(setup.Body))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	req.AddCookie(&http.Cookie{
-		Name:  "user_id",
-		Value: "bda031c0-4e7d-493a-92ba-6fc1eb3e6216",
-	})
+	for _, cookie := range setup.Cookies {
+		req.AddCookie(cookie)
+	}
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
+	return c, rec
+}
+
+func TestRecordPositionOK(t *testing.T) {
+	setup := contextSetup{
+		Method: http.MethodPost,
+		Path:   "/",
+		Body:   `{"video_id": "123", "position": 1}`,
+		Cookies: []*http.Cookie{
+			{Name: "user_id", Value: "bda031c0-4e7d-493a-92ba-6fc1eb3e6216"},
+		},
+	}
+	c, rec := setupContext(setup)
 	db, mock := redismock.NewClientMock()
 	mock.Regexp().ExpectSet("bda031c0-4e7d-493a-92ba-6fc1eb3e6216_123", 1, 1*time.Minute).
 		SetVal("OK")
@@ -38,12 +55,12 @@ func TestRecordPositionOK(t *testing.T) {
 }
 
 func TestRecordPositionMissingUserID(t *testing.T) {
-	e := echo.New()
-	positionJSON := `{"video_id": "123", "position": 1}`
-	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(positionJSON))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	setup := contextSetup{
+		Method: http.MethodPost,
+		Path:   "/",
+		Body:   `{"video_id": "123", "position": 1}`,
+	}
+	c, rec := setupContext(setup)
 	db, _ := redismock.NewClientMock()
 	h := position.NewHandler(db)
 	h.Record(c)
@@ -52,15 +69,13 @@ func TestRecordPositionMissingUserID(t *testing.T) {
 }
 
 func TestRecordPositionMissingPayload(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/", nil)
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	req.AddCookie(&http.Cookie{
-		Name:  "user_id",
-		Value: "bda031c0-4e7d-493a-92ba-6fc1eb3e6216",
-	})
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	setup := contextSetup{
+		Method: http.MethodPost,
+		Path:   "/",
+	}
+	c, rec := setupContext(setup)
+	req := c.Request()
+	req.AddCookie(&http.Cookie{Name: "user_id", Value: "bda031c0-4e7d-493a-92ba-6fc1eb3e6216"})
 	db, _ := redismock.NewClientMock()
 	h := position.NewHandler(db)
 	h.Record(c)
@@ -69,16 +84,15 @@ func TestRecordPositionMissingPayload(t *testing.T) {
 }
 
 func TestRecordPositionRedisError(t *testing.T) {
-	e := echo.New()
-	positionJSON := `{"video_id": "123", "position": 1}`
-	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(positionJSON))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	req.AddCookie(&http.Cookie{
-		Name:  "user_id",
-		Value: "bda031c0-4e7d-493a-92ba-6fc1eb3e6216",
-	})
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	setup := contextSetup{
+		Method: http.MethodPost,
+		Path:   "/",
+		Body:   `{"video_id": "123", "position": 1}`,
+		Cookies: []*http.Cookie{
+			{Name: "user_id", Value: "bda031c0-4e7d-493a-92ba-6fc1eb3e6216"},
+		},
+	}
+	c, rec := setupContext(setup)
 	db, mock := redismock.NewClientMock()
 	mock.Regexp().ExpectSet("bda031c0-4e7d-493a-92ba-6fc1eb3e6216_123", 1, 1*time.Minute).
 		SetErr(errors.New("failed to set key"))
@@ -89,16 +103,14 @@ func TestRecordPositionRedisError(t *testing.T) {
 }
 
 func TestHandlerFetchOK(t *testing.T) {
-	e := echo.New()
-	q := make(url.Values)
-	q.Set("video_id", "123")
-	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
-	req.AddCookie(&http.Cookie{
-		Name:  "user_id",
-		Value: "bda031c0-4e7d-493a-92ba-6fc1eb3e6216",
-	})
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	setup := contextSetup{
+		Method: http.MethodGet,
+		Path:   "/?video_id=123",
+		Cookies: []*http.Cookie{
+			{Name: "user_id", Value: "bda031c0-4e7d-493a-92ba-6fc1eb3e6216"},
+		},
+	}
+	c, rec := setupContext(setup)
 	db, mock := redismock.NewClientMock()
 	mock.ExpectGet("bda031c0-4e7d-493a-92ba-6fc1eb3e6216_123").SetVal("1")
 	h := position.NewHandler(db)
@@ -111,12 +123,11 @@ func TestHandlerFetchOK(t *testing.T) {
 }
 
 func TestHandlerMissingUserID(t *testing.T) {
-	e := echo.New()
-	q := make(url.Values)
-	q.Set("video_id", "123")
-	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	setup := contextSetup{
+		Method: http.MethodGet,
+		Path:   "/?video_id=123",
+	}
+	c, rec := setupContext(setup)
 	db, _ := redismock.NewClientMock()
 	h := position.NewHandler(db)
 
@@ -126,16 +137,14 @@ func TestHandlerMissingUserID(t *testing.T) {
 }
 
 func TestHandlerFetchPositionNotFound(t *testing.T) {
-	e := echo.New()
-	q := make(url.Values)
-	q.Set("video_id", "123")
-	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
-	req.AddCookie(&http.Cookie{
-		Name:  "user_id",
-		Value: "bda031c0-4e7d-493a-92ba-6fc1eb3e6216",
-	})
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	setup := contextSetup{
+		Method: http.MethodGet,
+		Path:   "/?video_id=123",
+		Cookies: []*http.Cookie{
+			{Name: "user_id", Value: "bda031c0-4e7d-493a-92ba-6fc1eb3e6216"},
+		},
+	}
+	c, rec := setupContext(setup)
 	db, mock := redismock.NewClientMock()
 	mock.ExpectGet("bda031c0-4e7d-493a-92ba-6fc1eb3e6216_123").SetErr(redis.Nil)
 	h := position.NewHandler(db)
@@ -146,16 +155,14 @@ func TestHandlerFetchPositionNotFound(t *testing.T) {
 }
 
 func TestHandlerFetchPositionRedisError(t *testing.T) {
-	e := echo.New()
-	q := make(url.Values)
-	q.Set("video_id", "123")
-	req := httptest.NewRequest(http.MethodGet, "/?"+q.Encode(), nil)
-	req.AddCookie(&http.Cookie{
-		Name:  "user_id",
-		Value: "bda031c0-4e7d-493a-92ba-6fc1eb3e6216",
-	})
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	setup := contextSetup{
+		Method: http.MethodGet,
+		Path:   "/?video_id=123",
+		Cookies: []*http.Cookie{
+			{Name: "user_id", Value: "bda031c0-4e7d-493a-92ba-6fc1eb3e6216"},
+		},
+	}
+	c, rec := setupContext(setup)
 	db, mock := redismock.NewClientMock()
 	mock.ExpectGet("bda031c0-4e7d-493a-92ba-6fc1eb3e6216_123").SetErr(errors.New("failed to get"))
 	h := position.NewHandler(db)
