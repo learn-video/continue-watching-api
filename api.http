@@ -14,6 +14,6 @@ Cookie: user_id=bda031c0-4e7d-493a-92ba-6fc1eb3e6216
 
 ###
 
-GET http://{{hostname}}:{{port}}/watching?user_id=bda031c0-4e7d-493a-92ba-6fc1eb3e6216&video_id=123 HTTP/1.1
+GET http://{{hostname}}:{{port}}/watching?video_id=123 HTTP/1.1
 Content-Type: application/json
 Cookie: user_id=bda031c0-4e7d-493a-92ba-6fc1eb3e6216

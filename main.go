@@ -16,7 +16,7 @@ type config struct {
 }
 
 func main() {
-	cfg := &config{}
+	cfg := config{}
 	if err := env.Parse(&cfg); err != nil {
 		log.Fatalf("error loading config: %s", err)
 	}
