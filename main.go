@@ -34,5 +34,6 @@ func main() {
 	e.Use(middleware.Logger())
 	e.POST("/watching", handler.Record)
 	e.GET("/watching", handler.Fetch)
+	e.File("/", "demo/index.html")
 	e.Logger.Fatal(e.Start(":8000"))
 }

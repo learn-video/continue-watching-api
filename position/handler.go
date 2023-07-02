@@ -14,7 +14,7 @@ type Position struct {
 }
 
 type PositionDetail struct {
-	Position int `json:"position"`
+	Position float64 `json:"position"`
 }
 
 type (

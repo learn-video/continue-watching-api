@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Continue Watching API demo</title>
+    <script src="https://hlsjs.video-dev.org/dist/hls.js"></script>
+</head>
+
+<body>
+    <video height="600" width="600" id="video" controls></video>
+
+    <script>
+        document.cookie = "user_id=bda031c0-4e7d-493a-92ba-6fc1eb3e6216";
+
+        async function recordPosition(data = {}) {
+            const response = await fetch("http://localhost:8000/watching", {
+                method: "POST",
+                mode: "same-origin",
+                cache: "no-cache",
+                credentials: "include",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data)
+            });
+            return response.json();
+        }
+
+        function fetchPosition(videoID) {
+            const url = `http://localhost:8000/watching?video_id=${videoID}`;
+            let currentTime = 0;
+
+            return fetch(url)
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else if (response.status === 404) {
+                        return Promise.reject(new Error('Video not found'));
+                    } else {
+                        return Promise.reject(new Error('Error retrieving video position'));
+                    }
+                })
+                .then(data => {
+                    if (data.position) {
+                        currentTime = data.position;
+                    }
+                    return currentTime;
+                })
+                .catch(error => {
+                    console.error(error);
+                    return currentTime;
+                });
+        }
+
+        fetchPosition("123")
+            .then(currentTime => {
+                console.log('Current time:', currentTime);
+            })
+            .catch(error => {
+                console.error('Error:', error.message);
+            });
+
+
+        var video = document.getElementById('video');
+        if (Hls.isSupported()) {
+            var hls = new Hls({
+                debug: false,
+            });
+            hls.loadSource('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8');
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+                video.muted = true;
+                video.play();
+            });
+        }
+
+        var currentTime = 0;
+        setInterval(function () {
+            recordPosition({ video_id: "123", position: video.currentTime }).then((data) => {
+                console.log(data);
+            });
+        }, 5000);
+    </script>
+</body>
+
+</html>

@@ -48,7 +48,7 @@ func TestFetchOK(t *testing.T) {
 	pos, err := position.Fetch(db, userID, videoID)
 
 	assert.Nil(t, err)
-	assert.Equal(t, pos, 1)
+	assert.Equal(t, pos, 1.0)
 	assert.Nil(t, mock.ExpectationsWereMet())
 }
 
@@ -62,7 +62,7 @@ func TestFetchPositionNotFound(t *testing.T) {
 	pos, err := position.Fetch(db, userID, videoID)
 
 	assert.Equal(t, err, position.ErrNotFound)
-	assert.Equal(t, pos, 0)
+	assert.Equal(t, pos, 0.0)
 	assert.Nil(t, mock.ExpectationsWereMet())
 }
 
@@ -76,6 +76,6 @@ func TestFetchRedisError(t *testing.T) {
 	pos, err := position.Fetch(db, userID, videoID)
 
 	assert.Equal(t, err, errors.New("failed to get key"))
-	assert.Equal(t, pos, 0)
+	assert.Equal(t, pos, 0.0)
 	assert.Nil(t, mock.ExpectationsWereMet())
 }

@@ -19,7 +19,7 @@ func Record(r *redis.Client, userID, videoID string, position float64) error {
 	return r.Set(context.TODO(), key, position, 1*time.Minute).Err()
 }
 
-func Fetch(r *redis.Client, userID, videoID string) (int, error) {
+func Fetch(r *redis.Client, userID, videoID string) (float64, error) {
 	key := fmt.Sprintf("%s_%s", userID, videoID)
 	val, err := r.Get(context.TODO(), key).Result()
 	if err == redis.Nil {
@@ -28,7 +28,7 @@ func Fetch(r *redis.Client, userID, videoID string) (int, error) {
 		return 0, err
 	}
 
-	pos, err := strconv.Atoi(val)
+	pos, err := strconv.ParseFloat(val, 64)
 	if err != nil {
 		return 0, err
 	}
