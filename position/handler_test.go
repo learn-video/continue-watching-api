@@ -38,14 +38,14 @@ func TestRecordPositionOK(t *testing.T) {
 	setup := contextSetup{
 		Method: http.MethodPost,
 		Path:   "/",
-		Body:   `{"video_id": "123", "position": 1}`,
+		Body:   `{"video_id": "123", "position": 1.0}`,
 		Cookies: []*http.Cookie{
 			{Name: "user_id", Value: "bda031c0-4e7d-493a-92ba-6fc1eb3e6216"},
 		},
 	}
 	c, rec := setupContext(setup)
 	db, mock := redismock.NewClientMock()
-	mock.Regexp().ExpectSet("bda031c0-4e7d-493a-92ba-6fc1eb3e6216_123", 1, 1*time.Minute).
+	mock.Regexp().ExpectSet("bda031c0-4e7d-493a-92ba-6fc1eb3e6216_123", 1.0, 1*time.Minute).
 		SetVal("OK")
 	h := position.NewHandler(db)
 

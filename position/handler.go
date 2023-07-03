@@ -9,8 +9,8 @@ import (
 )
 
 type Position struct {
-	VideoID  string `json:"video_id" validate:"required"`
-	Position int    `json:"position" validate:"required"`
+	VideoID  string  `json:"video_id" validate:"required"`
+	Position float64 `json:"position" validate:"required"`
 }
 
 type PositionDetail struct {

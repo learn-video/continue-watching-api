@@ -14,7 +14,7 @@ var (
 	ErrNotFound = errors.New("no position tracked")
 )
 
-func Record(r *redis.Client, userID, videoID string, position int) error {
+func Record(r *redis.Client, userID, videoID string, position float64) error {
 	key := fmt.Sprintf("%s_%s", userID, videoID)
 	return r.Set(context.TODO(), key, position, 1*time.Minute).Err()
 }
