@@ -61,11 +61,11 @@
                 console.error('Error:', error.message);
             });
 
-
         var video = document.getElementById('video');
         if (Hls.isSupported()) {
             var hls = new Hls({
                 debug: false,
+                startPosition: 10,
             });
             hls.loadSource('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8');
             hls.attachMedia(video);
@@ -75,7 +75,6 @@
             });
         }
 
-        var currentTime = 0;
         setInterval(function () {
             recordPosition({ video_id: "123", position: video.currentTime }).then((data) => {
                 console.log(data);
