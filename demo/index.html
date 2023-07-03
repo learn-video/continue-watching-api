@@ -27,52 +27,47 @@
             return response.json();
         }
 
-        function fetchPosition(videoID) {
+        async function fetchPosition(videoID) {
             const url = `http://localhost:8000/watching?video_id=${videoID}`;
-            let currentTime = 0;
 
-            return fetch(url)
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else if (response.status === 404) {
-                        return Promise.reject(new Error('Video not found'));
-                    } else {
-                        return Promise.reject(new Error('Error retrieving video position'));
-                    }
-                })
-                .then(data => {
-                    if (data.position) {
-                        currentTime = data.position;
-                    }
-                    return currentTime;
-                })
-                .catch(error => {
-                    console.error(error);
-                    return currentTime;
-                });
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (response.ok) {
+                    const position = data.position;
+                    return position;
+                } else {
+                    throw new Error(`Request failed with status ${response.status}`);
+                }
+            } catch (error) {
+                console.error('Error:', error.message);
+            }
         }
 
+        var video = document.getElementById('video');
+
         fetchPosition("123")
-            .then(currentTime => {
-                console.log('Current time:', currentTime);
+            .then(position => {
+                playVideo(video, position);
             })
             .catch(error => {
-                console.error('Error:', error.message);
+                playVideo(video, 0);
             });
 
-        var video = document.getElementById('video');
-        if (Hls.isSupported()) {
-            var hls = new Hls({
-                debug: false,
-                startPosition: 10,
-            });
-            hls.loadSource('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8');
-            hls.attachMedia(video);
-            hls.on(Hls.Events.MEDIA_ATTACHED, function () {
-                video.muted = true;
-                video.play();
-            });
+        function playVideo(video, startPosition) {
+            if (Hls.isSupported()) {
+                var hls = new Hls({
+                    debug: false,
+                    startPosition: startPosition,
+                });
+                hls.loadSource('https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8');
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MEDIA_ATTACHED, function () {
+                    video.muted = true;
+                    video.play();
+                });
+            }
         }
 
         setInterval(function () {
