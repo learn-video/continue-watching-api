@@ -10,7 +10,7 @@ Please use the issues section to discuss and share your solutions. Remember to t
 
 [![build](https://github.com/learn-video/continue-watching-api/actions/workflows/build.yml/badge.svg)](https://github.com/learn-video/continue-watching-api/actions/workflows/build.yml)
 
-Do you enjoy watching videos on demand platforms like YouTube, HBO, Prime Video, or Globoplay? If so, you may have noticed a convenient feature called "Continue Watching." This feature saves you from the hassle of remembering where you left off in a video.
+Do you enjoy watching videos on demand? If so, you may have noticed a convenient feature called "Continue Watching." This feature saves you from the hassle of remembering where you left off in a video.
 
 In this project, we aim to develop a video player application that incorporates the "Continue Watching" functionality. The video player will interact with an API to store and retrieve the current position being watched in a video.
 
