@@ -1,5 +1,9 @@
 # Continue Watching API
 
+Please use the issues section to discuss and share your solutions. Remember to tag the issue with the "challenge" label to make it easier to filter and locate solutions in the future.
+
+---
+
 [![build](https://github.com/learn-video/continue-watching-api/actions/workflows/build.yml/badge.svg)](https://github.com/learn-video/continue-watching-api/actions/workflows/build.yml)
 
 Do you enjoy watching videos on demand platforms like YouTube, HBO, Prime Video, or Globoplay? If so, you may have noticed a convenient feature called "Continue Watching." This feature saves you from the hassle of remembering where you left off in a video.
