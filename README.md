@@ -2,6 +2,10 @@
 
 Please use the issues section to discuss and share your solutions. Remember to tag the issue with the "challenge" label to make it easier to filter and locate solutions in the future.
 
+<p align="center" width="100%">
+    <img src="bbb.png" alt="big buck bunny" />
+</p>
+
 ---
 
 [![build](https://github.com/learn-video/continue-watching-api/actions/workflows/build.yml/badge.svg)](https://github.com/learn-video/continue-watching-api/actions/workflows/build.yml)
