@@ -67,3 +67,19 @@ Once the server is running, you can begin testing the "Continue Watching" featur
 4. The video will resume playback from a position as close as possible to where you left off, allowing you to seamlessly continue watching.
 
 By following these steps, you can observe how the project effectively stores and retrieves the last watched position, providing a convenient viewing experience for users. Feel free to explore different scenarios, pause the video, seek to the future to fully grasp the capabilities of the "Continue Watching" feature.
+
+## Challenges to the reader
+
+The most basic scenarios are described. How would you evolve the "Continue Watching API" with the following challenges in mind?
+
+* **Concurrent requests for the same video's position?** Imagine multiple instances of the video player making simultaneous requests to update the position for a specific video. How would you ensure data consistency and prevent conflicts when multiple requests are received concurrently?
+
+* **Scaling the system to handle a large number of users and videos?** As the number of users and videos increases, the system's scalability becomes crucial. How would you design and implement a scalable architecture that can handle a high volume of requests, store and retrieve positions efficiently, and ensure optimal performance across a growing user base?
+
+* **Handling API Downtime** Imagine a scenario where the API goes offline for an extended period. How would you ensure that no position events are lost during this downtime?
+
+* **Dealing with Bad API Responses** What steps would you take if the API starts responding with error status codes like HTTP 5xx? How would you handle these situations to maintain data integrity and ensure the reliability of the "Continue Watching" feature?
+
+* **Optimal Expiring Time in Redis** Determine an appropriate expiration time for the position data stored in Redis. Consider factors such as the frequency of user activity, the maximum duration between user visits, and the balance between storage efficiency and ensuring the freshness of the position data. Find a suitable expiration time that minimizes storage overhead while still providing an accurate representation of the user's most recent position.
+
+* **Preserving Values in Expired Redis Keys** As Redis is a volatile storage caching mechanism, keys can expire based on the configured expiration time. How would you handle situations where Redis keys containing position data have expired?
